@@ -1,0 +1,26 @@
+{
+    "version": "0.2.0",
+    "configurations": [
+      {
+        "name": "debug server",
+        "type": "cppdbg",
+        "request": "launch",
+        "program": "${workspaceFolder}/server/build/web-alarm-server",
+        "args": [],
+        "stopAtEntry": false,
+        "cwd": "${workspaceFolder}/server/build",
+        "environment": [],
+        "externalConsole": false,
+        "MIMode": "gdb",
+        "setupCommands": [
+          {
+            "description": "Enable pretty-printing for gdb",
+            "text": "-enable-pretty-printing",
+            "ignoreFailures": true
+          }
+        ],
+        "preLaunchTask": "build server",
+        "miDebuggerPath": "/usr/bin/gdb"
+      }
+    ]
+}
