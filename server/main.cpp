@@ -64,31 +64,33 @@ string get_alarms() {
   return result;
 }
 
-void remove_alarms(connection_hdl hdl) {
+bool remove_alarms(connection_hdl hdl) {
   lock_guard<mutex> guard(alarms_lock);
   owner_less<connection_hdl> comp;
+  bool removed = false;
   for (auto it = alarms.begin(), next = it; it != alarms.end(); it = next) {
     next++;
     if (!comp(it->second.first, hdl) && !comp(hdl, it->second.first)) {
       alarms.erase(it);
+      removed = true;
     }
   }
+  return removed;
 }
 
 bool prune_clients() {
   lock_guard<mutex> guard(clients_lock);
-  bool pruned = false;
+  bool alarm_removed = false;
   for (auto it = clients.begin(), next = it; it != clients.end(); it = next) {
     next++;
     tm t = *localtime(&(it->second));
     t.tm_sec += CLIENT_EXPIRY;
     if (mktime(&t) < time(0)) {
       clients.erase(it);
-      remove_alarms(it->first);
-      pruned = true;
+      alarm_removed |= remove_alarms(it->first);
     }
   }
-  return pruned;
+  return alarm_removed;
 }
 
 void send_alarms() {
@@ -106,8 +108,13 @@ void send_alarms() {
 }
 
 void on_open(connection_hdl hdl) {
-  lock_guard<mutex> guard(clients_lock);
-  clients[hdl] = time(0);
+  {
+    lock_guard<mutex> guard(clients_lock);
+    clients[hdl] = time(0);
+  }
+
+  string alarms_msg = get_alarms();
+  s.send(hdl, alarms_msg, websocketpp::frame::opcode::text);
 }
 
 void on_close(connection_hdl hdl) {
