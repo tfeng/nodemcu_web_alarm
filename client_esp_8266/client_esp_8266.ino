@@ -10,7 +10,7 @@ const int    SERVER_PORT   = 37813;
 
 const String CLIENT_NAME   = "Raymond";
 
-const int    BUTTON_PIN    = 10;
+const int    BUTTON_PIN    = 15;
 const int    BUZZER_PIN    = 12;
 const int    LED_PIN       = 2;
 const int    STATUS_PIN    = 16;
